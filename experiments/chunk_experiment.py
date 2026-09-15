@@ -115,7 +115,13 @@ def run_config(chunk_size, overlap, model_name, note="", slug=None):
         separators=config.separators,
         length_function=len,
     )
-    embeddings = OpenAIEmbeddings(openai_api_base=config.address, model=model_name)
+    embeddings = OpenAIEmbeddings(
+        openai_api_base=config.address,
+        model=model_name,
+        # 发送原文而非 token id：第三方接口词表不同，token id 会产生
+        # 语义错乱的向量（详见 vector_store_service.py 的注释）
+        check_embedding_ctx_length=False,
+    )
 
     try:
         if db_dir.exists():

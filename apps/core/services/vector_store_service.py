@@ -30,6 +30,11 @@ class VectorStoreService:
         self.embedding = embedding or OpenAIEmbeddings(
             openai_api_base=config.address,
             model=config.embedding_model_name,
+            # 必须关闭长度检查：默认开启时 langchain 会先把文本转成 tiktoken
+            # 的 token id 再发给 API——OpenAI 官方接口能还原，但第三方兼容
+            # 接口（SiliconFlow/bge-m3）词表不同，收到的是语义错乱的 token，
+            # 向量与真实语义脱钩（实测同文本与直连 API 余弦仅 0.29）
+            check_embedding_ctx_length=False,
         )
 
         self.vector_store = Chroma(

@@ -53,6 +53,9 @@ def embed_all(chunks):
     embedder = OpenAIEmbeddings(
         openai_api_base=EMBED_BASE,
         model=EMBED_MODEL,
+        # 发送原文而非 token id：第三方接口词表不同，token id 会产生
+        # 语义错乱的向量；浏览器端查询走原始 API，两边必须同一空间
+        check_embedding_ctx_length=False,
     )
     vectors = []
     texts = [c["text"] for c in chunks]
