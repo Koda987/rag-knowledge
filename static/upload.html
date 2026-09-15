@@ -201,7 +201,11 @@
             background: var(--brand-ghost); color: var(--brand-dark);
             padding: 2px 10px; border-radius: var(--radius-full); font-weight: 700;
         }
-        .doc-list { max-height: 460px; flex: 1; }
+        /* overflow 必须与 max-height 成对出现：只限高不滚动，超出的列表项会
+           直接画出容器外，撑破卡片并遮挡下方区域（12 篇文档时实测复现） */
+        .doc-list { max-height: 460px; overflow-y: auto; flex: 1; }
+        .doc-list::-webkit-scrollbar { width: 3px; }
+        .doc-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
         .doc-item {
             display: flex; align-items: center; gap: 10px;
             padding: 11px 12px;
