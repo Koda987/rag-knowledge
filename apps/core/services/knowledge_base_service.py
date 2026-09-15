@@ -10,7 +10,6 @@ import os
 import threading
 from datetime import datetime
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
 import config_data as config
 from . import chunking
 
@@ -64,12 +63,13 @@ class KnowledgeBaseService:
 
         os.makedirs(config.persist_directory, exist_ok=True)
 
+        # 复用 vector_store_service 的嵌入器（单一配置来源）：
+        # 该处已关闭 check_embedding_ctx_length——此处曾自建默认配置的
+        # 嵌入器，token-id 问题导致入库向量与检索端不在同一向量空间
+        from .vector_store_service import vector_store_service as _vss
         self.chroma = Chroma(
             collection_name=config.collection_name,
-            embedding_function=OpenAIEmbeddings(
-                openai_api_base=config.address,
-                model=config.embedding_model_name,
-            ),
+            embedding_function=_vss.embedding,
             persist_directory=config.persist_directory,
         )
 
