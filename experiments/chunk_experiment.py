@@ -158,6 +158,8 @@ def run_config(chunk_size, overlap, model_name, note="", slug=None):
             rank = next((i + 1 for i, s in enumerate(sources) if s == expected), None)
             if rank:
                 mrr_sum += 1.0 / rank
+                if rank == 1:
+                    hit1 += 1
             if rank != 1:
                 # 记录"第一名未命中"的题（而非 Top-5 全脱靶——3 篇语料下后者几乎不发生）
                 fails.append(q + ("（Top-5 全脱靶）" if rank is None else f"（正确文档排第 {rank} 名）"))

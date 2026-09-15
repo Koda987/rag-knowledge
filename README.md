@@ -110,15 +110,16 @@ python run.py --port 8000
 | fix | SSE 流式帧 JSON 包装 | 文本内含换行符会破坏 `data:` 帧分隔，导致前端解析错乱 |
 | 安全 | session_id 正则白名单校验（存储层 + 路由层双重） | session_id 直接拼进文件路径，`../xx` 可路径穿越写到目录外 |
 | style | 字体本地化、按钮文字化、统计卡三列化、favicon | Google Fonts 国内加载失败回退宋体；裸图标按钮语义不明 |
-| 实验 | chunk 参数扫描（6 组 × 16 题）：**300/50 实测最优**（hit@1 69%），overlap 贡献 +7pp，小块跌破随机基线 | 用数据替代默认参数；完整报告见 experiments/results.md |
+| 实验 | chunk 参数扫描两轮：首轮 hit@1 25%~69%（后证实测于损坏的向量空间，参数敏感性亦为伪信号）；嵌入修复后重跑（服装语料）：**6 组配置全部 hit@1 100% / MRR 1.000**，英文模型对照 75% | 嵌入质量优先于调参的直接证据；报告见 experiments/results.md |
+| fix | 嵌入修复：langchain_openai 默认把文本转成 tiktoken token id 再发给第三方接口，bge-m3 词表不同导致向量语义损坏（同文本与直连 API 余弦仅 0.29）——三处嵌入器统一关闭 check_embedding_ctx_length，上传端改为复用检索端嵌入器 | 检索从"时好时坏"（正确块被挤出 Top-5）到全配置满分；三角验证定位（embed_query / embed_documents / 直连 API 互证） |
 
 ## 🔬 后续计划
 
 | 事项 | 说明 |
 |---|---|
-| chunk 实验扩充 | ✅ 已完成 6 组 × 16 题扫描（experiments/results.md）；知识库换域/扩充语料后重跑 |
+| chunk 实验扩充 | ✅ 两轮完成：嵌入修复前（25%~69%，损坏向量空间）+ 修复后全配置 100%；换域副本（AI 面试八股库语料）为 94%，甜区 88%~94% |
 | 评估集扩充 | 已建 16 题评估集（experiments/chunk_experiment.py，含大量换述题）；计划扩至 30+ 题 |
-| 英文嵌入模型对照 | bge-large-en-v1.5 在 SiliconFlow 不可用（400），待找到可用英文模型补测 |
+| 英文嵌入模型对照 | ✅ 已补测：bge-large-en-v1.5 hit@1 75% vs bge-m3 100%（服装语料）、81% vs 94%（八股语料），印证中文语料应选中文嵌入模型 |
 | 引用溯源 | 回答标注引用的来源文档（metadata 的 source 已就位） |
 | LangGraph 迁移 | RunnableWithMessageHistory 已被 LangChain 标记弃用，计划迁移至 LangGraph persistence |
 | 部署上线 | Docker 化 + 免费托管（HF Spaces / Render 等） |
